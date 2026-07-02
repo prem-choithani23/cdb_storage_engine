@@ -21,7 +21,7 @@ SlotId page_insert(Page * page , void * data ,  uint16_t length) {
 
     int freeSpaceOffset = page->header.free_space_pointer;
 
-    int free_space = get_free_space(page);
+    size_t free_space = get_free_space(page);
 
     logger(from , "Calculated slot position and available free space.");
 
@@ -114,12 +114,12 @@ SlotId page_update(Page* page, SlotId slot_id, void* data, uint16_t length) {
 
     logger(from , "New record size GREATER THAN old record");
 
-    int free_space = get_free_space(page);
+    size_t free_space = get_free_space(page);
 
     if ( free_space >= length ) {
         logger(from , "Performing insertion of new record & tombstoning of old record");
 
-        int free_space_offset = header.free_space_pointer;
+        size_t free_space_offset = header.free_space_pointer;
         int new_record_offset = free_space_offset - length;
 
         slot.length = length;
