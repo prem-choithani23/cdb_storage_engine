@@ -1,6 +1,10 @@
 //
 // Created by prem-choithani on 6/7/26.
 //
+
+#define _XOPEN_SOURCE 700
+
+
 #include <stdint.h>
 
 #include "../headers/constants.h"
@@ -96,4 +100,7 @@ PageId disk_allocate_page(const DiskManager * disk_manager) {
 
 void disk_deallocate_page(DiskManager * disk_manager , PageId pid) {
     // not yet
+
+    (void)disk_manager;
+    (void)pid;
 }
