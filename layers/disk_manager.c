@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "../headers/constants.h"
+#include "../headers/config.h"
 #include "../headers/disk_manager.h"
 
 #include <fcntl.h>

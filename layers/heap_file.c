@@ -4,7 +4,7 @@
 
 #include "../headers/heap_file.h"
 #include "../headers/logger.h"
-#include "../headers/constants.h"
+#include "../headers/config.h"
 
 #include <stdlib.h>
 

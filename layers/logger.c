@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include "../headers/logger.h"
-#include "../headers/constants.h"
+#include "../headers/config.h"
 
 void logger(const char * from , const char * message){
     if (!ENABLE_LOGGING) return;
