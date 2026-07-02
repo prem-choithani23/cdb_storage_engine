@@ -5,7 +5,7 @@
 #ifndef STORAGE_ENGINE_PAGR_H
 #define STORAGE_ENGINE_PAGR_H
 #include <stdint.h>
-
+#include<stddef.h>
 
 #define PAGE_HEADER_SIZE sizeof(PageHeader)
 #define PAGE_PAYLOAD_SIZE  (4096 - PAGE_HEADER_SIZE)
@@ -30,6 +30,6 @@ typedef struct page {
     uint8_t data[PAGE_PAYLOAD_SIZE];
 }Page;
 
-int get_free_space(Page * page);
+size_t get_free_space(Page * page);
 
 #endif //STORAGE_ENGINE_PAGR_H
