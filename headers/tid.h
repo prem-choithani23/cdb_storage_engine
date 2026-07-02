@@ -5,10 +5,12 @@
 #ifndef STORAGE_ENGINE_TID_H
 #define STORAGE_ENGINE_TID_H
 
-#endif //STORAGE_ENGINE_TID_H
-
-
+#include "page.h"
+#include "slotted_page.h"
 
 typedef struct tid {
+    PageId page_id;
+    SlotId slot_id;
+} TID;
 
-}TID;
+#endif //STORAGE_ENGINE_TID_H
