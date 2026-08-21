@@ -3,7 +3,7 @@
 //
 
 #include "../../include/storage/page.h"
-#include "../headers/slot.h"
+#include "../../include/storage/slot.h"
 
 size_t get_free_space(Page * page) {
      PageHeader header = page->header;
