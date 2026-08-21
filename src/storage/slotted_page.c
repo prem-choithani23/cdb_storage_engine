@@ -2,7 +2,7 @@
 // Created by prem-choithani on 7/1/26.
 //
 #include <stdint.h>
-#include "../headers/slotted_page.h"
+#include "../../include/storage/slotted_page.h"
 
 #include <string.h>
 
@@ -10,6 +10,15 @@
 #include "../../include/logging/logger.h"
 
 static const char * from  = "SLOTTED_PAGE";
+
+void page_init(Page *page, PageId page_id) {
+    memset(page, 0, sizeof(Page));
+
+    page->header.slot_count = 0;
+    page->header.free_space_pointer = PAGE_PAYLOAD_SIZE;
+    page->header.page_id = page_id;
+    page->header.next_free_page = INVALID_PAGE_ID;
+}
 
 SlotId page_insert(Page * page , void * data ,  uint16_t length) {
 

@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include "../../include/logging/logger.h"
 #include "../../include/storage/page.h"
+#include "../../include/storage/slotted_page.h"
 
 
 static const char * from  = "DISK_MANAGER";
@@ -26,7 +27,7 @@ DiskManager * disk_manager_open(const char * path) {
 
     logger(from , "Opening Disk manager");
     DiskManager * disk_manager = (DiskManager *)malloc(sizeof(DiskManager));
-    disk_manager->fd = open(path, O_RDWR | O_CREAT);
+    disk_manager->fd = open(path, O_RDWR | O_CREAT , O_CREAT);
 
     if (disk_manager->fd == -1) {
         logger(from , "Failed to open database file");
@@ -87,11 +88,7 @@ PageId disk_allocate_page(const DiskManager * disk_manager) {
     const PageId newPageId = file_size/PAGE_SIZE;
 
     Page page;
-    memset(&page, 0, sizeof(Page));          // zero everything first
-    page.header.slot_count = 0;              // then set fields
-    page.header.free_space_pointer = PAGE_PAYLOAD_SIZE;
-    page.header.page_id = newPageId;
-    page.header.next_free_page = INVALID_PAGE_ID;
+    page_init(&page , newPageId);
 
     pwrite(disk_manager->fd, &page, PAGE_SIZE, (off_t)newPageId * PAGE_SIZE);
 
