@@ -10,174 +10,552 @@
 
 static const char * from = "HEAP_FILE";
 
+
 HeapFile* heap_file_open(const char* path) {
 
-    logger(from , "Opening Heapfile");
+    logger(from, "Initializing heap_file_open...");
+
     HeapFile* hf = (HeapFile*) malloc(sizeof(HeapFile));
+
     hf->first_free_page = INVALID_PAGE_ID;
-    hf->dm = disk_manager_open(path);
-    logger(from , "Heapfile opened successfully");
+
+    logger(from, "Opening buffer pool.");
+
+    hf->buffer_pool = buffer_pool_open(path);
+
+    logger(from, "Heapfile opened successfully.");
 
     return hf;
 }
 
+
 void heap_file_close(HeapFile* hf) {
-    disk_manager_close(hf->dm);
+
+    logger(from, "Initializing heap_file_close...");
+
+    logger(from, "Closing buffer pool.");
+
+    buffer_pool_close(hf->buffer_pool);
+
     free(hf);
+
+    logger(from, "Heapfile closed successfully.");
 }
 
-TID heap_file_insert(HeapFile* hf, void* data, uint16_t length) {
+
+TID heap_file_insert(
+    HeapFile* hf,
+    void* data,
+    uint16_t length
+) {
 
     logger(from, "Initializing heap_file_insert...");
 
     if (hf->first_free_page == INVALID_PAGE_ID) {
-        logger(from, "No free page found. Allocating a new page.");
-        hf->first_free_page = disk_allocate_page(hf->dm);
+
+        logger(
+            from,
+            "No free page found. Allocating a new page."
+        );
+
+        buffer_pool_new_page(
+            hf->buffer_pool,
+            &hf->first_free_page
+        );
+
+        logger(
+            from,
+            "New page allocated and added as first free page."
+        );
+
+        buffer_pool_unpin_page(
+            hf->buffer_pool,
+            hf->first_free_page,
+            false
+        );
+
+        logger(
+            from,
+            "Newly allocated page unpinned."
+        );
     }
 
-    PageId current_page_id = hf->first_free_page;
-    PageId previous_page_id = INVALID_PAGE_ID;
+    PageId current_page_id =
+        hf->first_free_page;
+
+    PageId previous_page_id =
+        INVALID_PAGE_ID;
 
     while (current_page_id != INVALID_PAGE_ID) {
 
-        logger(from, "Reading current page.");
+        logger(
+            from,
+            "Fetching current free page from buffer pool."
+        );
 
-        Page page;
-        disk_read_page(hf->dm, current_page_id, &page);
+        Page *page =
+            buffer_pool_fetch_page(
+                hf->buffer_pool,
+                current_page_id
+            );
 
-        int free_space = get_free_space(&page);
+        logger(
+            from,
+            "Current free page fetched successfully."
+        );
+
+        int free_space =
+            get_free_space(page);
+
+        logger(
+            from,
+            "Calculated available free space."
+        );
 
         if (free_space >= length) {
-            logger(from, "Sufficient free space found. Inserting record.");
 
-            SlotId slot_id = page_insert(&page, data, length);
+            logger(
+                from,
+                "Sufficient free space found. Inserting record."
+            );
 
-            disk_write_page(hf->dm, page.header.page_id, &page);
+            SlotId slot_id =
+                page_insert(
+                    page,
+                    data,
+                    length
+                );
 
-            logger(from, "Record inserted and page written to disk.");
+            logger(
+                from,
+                "Record inserted into current page."
+            );
 
-            if (get_free_space(&page) < MIN_FREE_SPACE) {
+            buffer_pool_flush_page(
+                hf->buffer_pool,
+                page->header.page_id
+            );
 
-                logger(from, "Page no longer qualifies as a free page. Removing it from free page list.");
+            logger(
+                from,
+                "Record inserted and page written to disk."
+            );
+
+            if (get_free_space(page) < MIN_FREE_SPACE) {
+
+                logger(
+                    from,
+                    "Page no longer qualifies as a free page. Removing it from free page list."
+                );
 
                 if (previous_page_id == INVALID_PAGE_ID) {
-                    hf->first_free_page = page.header.next_free_page;
-                    logger(from, "Updated head of free page list.");
+
+                    hf->first_free_page =
+                        page->header.next_free_page;
+
+                    logger(
+                        from,
+                        "Updated head of free page list."
+                    );
+
                 }
                 else {
-                    Page prev_page;
-                    disk_read_page(hf->dm, previous_page_id, &prev_page);
 
-                    prev_page.header.next_free_page = page.header.next_free_page;
+                    logger(
+                        from,
+                        "Fetching previous free page."
+                    );
 
-                    disk_write_page(hf->dm, previous_page_id, &prev_page);
+                    Page *prev_page =
+                        buffer_pool_fetch_page(
+                            hf->buffer_pool,
+                            previous_page_id
+                        );
 
-                    logger(from, "Updated previous page to bypass current page in free page list.");
+                    logger(
+                        from,
+                        "Previous free page fetched successfully."
+                    );
+
+                    prev_page->header.next_free_page =
+                        page->header.next_free_page;
+
+                    logger(
+                        from,
+                        "Updated previous page to bypass current page."
+                    );
+
+                    buffer_pool_unpin_page(
+                        hf->buffer_pool,
+                        previous_page_id,
+                        true
+                    );
+
+                    logger(
+                        from,
+                        "Previous free page unpinned and marked dirty."
+                    );
                 }
             }
 
-            logger(from, "heap_file_insert completed successfully.");
+            logger(
+                from,
+                "Unpinning current page after insertion."
+            );
 
-            return (TID){ .slot_id = slot_id, .page_id = page.header.page_id };
+            buffer_pool_unpin_page(
+                hf->buffer_pool,
+                page->header.page_id,
+                true
+            );
+
+            logger(
+                from,
+                "heap_file_insert completed successfully."
+            );
+
+            return (TID){
+                .slot_id = slot_id,
+                .page_id = page->header.page_id
+            };
         }
 
-        logger(from, "Current page does not have enough free space. Moving to next free page.");
+        logger(
+            from,
+            "Current page does not have enough free space. Moving to next free page."
+        );
 
-        previous_page_id = page.header.page_id;
-        current_page_id = page.header.next_free_page;
+        previous_page_id =
+            page->header.page_id;
+
+        current_page_id =
+            page->header.next_free_page;
+
+        buffer_pool_unpin_page(
+            hf->buffer_pool,
+            page->header.page_id,
+            false
+        );
+
+        logger(
+            from,
+            "Current page unpinned after read-only traversal."
+        );
     }
 
-    logger(from, "No suitable page found. Allocating a new page and retrying insertion.");
+    logger(
+        from,
+        "No suitable page found. Allocating a new page and retrying insertion."
+    );
 
-    PageId new_page_id = disk_allocate_page(hf->dm);
-    hf->first_free_page = new_page_id;
+    PageId new_page_id;
 
-    return heap_file_insert(hf, data, length);
+    buffer_pool_new_page(
+        hf->buffer_pool,
+        &new_page_id
+    );
+
+    logger(
+        from,
+        "New page allocated successfully."
+    );
+
+    buffer_pool_unpin_page(
+        hf->buffer_pool,
+        new_page_id,
+        false
+    );
+
+    logger(
+        from,
+        "Newly allocated page unpinned."
+    );
+
+    hf->first_free_page =
+        new_page_id;
+
+    logger(
+        from,
+        "Updated first free page pointer."
+    );
+
+    return heap_file_insert(
+        hf,
+        data,
+        length
+    );
 }
 
-int heap_file_read(HeapFile* hf, TID tid, void* out, uint16_t length) {
+
+int heap_file_read(
+    HeapFile* hf,
+    TID tid,
+    void* out,
+    uint16_t length
+) {
 
     logger(from, "Starting heap_file_read()...");
 
     SlotId slot_id = tid.slot_id;
     PageId page_id = tid.page_id;
 
-    logger(from, "Reading page from disk.");
+    logger(
+        from,
+        "Fetching requested page from buffer pool."
+    );
 
-    Page page;
-    disk_read_page(hf->dm, page_id, &page);
+    Page *page =
+        buffer_pool_fetch_page(
+            hf->buffer_pool,
+            page_id
+        );
 
-    logger(from, "Reading record from page.");
+    logger(
+        from,
+        "Requested page fetched successfully."
+    );
 
-    int result = page_read(&page, slot_id, out, length);
+    logger(
+        from,
+        "Reading record from page."
+    );
 
-    logger(from, "heap_file_read completed successfully.");
+    int result =
+        page_read(
+            page,
+            slot_id,
+            out,
+            length
+        );
+
+    logger(
+        from,
+        "Record read operation completed."
+    );
+
+    buffer_pool_unpin_page(
+        hf->buffer_pool,
+        page->header.page_id,
+        false
+    );
+
+    logger(
+        from,
+        "Page unpinned after read-only operation."
+    );
+
+    logger(
+        from,
+        "heap_file_read completed successfully."
+    );
 
     return result;
 }
 
-void heap_file_delete(HeapFile* hf, TID tid) {
 
-    logger(from, "Starting heap_file_delete()...");
+void heap_file_delete(
+    HeapFile* hf,
+    TID tid
+) {
+
+    logger(
+        from,
+        "Starting heap_file_delete()..."
+    );
 
     SlotId slot_id = tid.slot_id;
     PageId page_id = tid.page_id;
 
-    logger(from, "Reading page from disk.");
+    logger(
+        from,
+        "Fetching page containing record."
+    );
 
-    Page page;
-    disk_read_page(hf->dm, page_id, &page);
+    Page *page =
+        buffer_pool_fetch_page(
+            hf->buffer_pool,
+            page_id
+        );
 
-    logger(from, "Deleting record from page.");
+    logger(
+        from,
+        "Page fetched successfully."
+    );
 
-    page_delete(&page, slot_id);
+    logger(
+        from,
+        "Deleting record from page."
+    );
 
-    logger(from, "Adding page back to the free page list.");
+    page_delete(
+        page,
+        slot_id
+    );
 
-    page.header.next_free_page = hf->first_free_page;
-    hf->first_free_page = page_id;
+    logger(
+        from,
+        "Record deleted successfully."
+    );
 
-    logger(from, "Writing updated page back to disk.");
+    logger(
+        from,
+        "Adding page back to free page list."
+    );
 
-    disk_write_page(hf->dm, page_id, &page);
+    page->header.next_free_page =
+        hf->first_free_page;
 
-    logger(from, "heap_file_delete completed successfully.");
+    hf->first_free_page =
+        page_id;
+
+    logger(
+        from,
+        "Updated free page list."
+    );
+
+    buffer_pool_unpin_page(
+        hf->buffer_pool,
+        page->header.page_id,
+        true
+    );
+
+    logger(
+        from,
+        "Deleted page unpinned and marked dirty."
+    );
+
+    logger(
+        from,
+        "heap_file_delete completed successfully."
+    );
 }
 
-TID heap_file_update(HeapFile* hf, TID tid, void* data, uint16_t length) {
 
-    logger(from, "Starting heap_file_update()...");
+TID heap_file_update(
+    HeapFile* hf,
+    TID tid,
+    void* data,
+    uint16_t length
+) {
+
+    logger(
+        from,
+        "Starting heap_file_update()..."
+    );
 
     SlotId slot_id = tid.slot_id;
     PageId page_id = tid.page_id;
 
-    Page page;
-    disk_read_page(hf->dm, page_id, &page);
+    logger(
+        from,
+        "Fetching page containing record."
+    );
 
-    SlotId post_update_slot_id  = page_update(&page , slot_id, data, length);
+    Page *page =
+        buffer_pool_fetch_page(
+            hf->buffer_pool,
+            page_id
+        );
+
+    logger(
+        from,
+        "Page fetched successfully."
+    );
+
+    logger(
+        from,
+        "Attempting to update record."
+    );
+
+    SlotId post_update_slot_id =
+        page_update(
+            page,
+            slot_id,
+            data,
+            length
+        );
 
     if (post_update_slot_id != INVALID_SLOT_ID) {
-        logger(from ,"Update complete successfully");
 
-        disk_write_page(hf->dm , page_id, &page);
+        logger(
+            from,
+            "Update completed successfully in existing page."
+        );
 
-        logger(from, "heap_file_update completed successfully.");
+        buffer_pool_unpin_page(
+            hf->buffer_pool,
+            page->header.page_id,
+            true
+        );
 
-        return (TID){.slot_id = post_update_slot_id , .page_id = page_id};
+        logger(
+            from,
+            "Updated page unpinned and marked dirty."
+        );
+
+        logger(
+            from,
+            "heap_file_update completed successfully."
+        );
+
+        return (TID){
+            .slot_id = post_update_slot_id,
+            .page_id = page_id
+        };
     }
 
-    logger(from, "Starting OUT-OF-PAGE-RELOCATION");
+    logger(
+        from,
+        "Starting OUT-OF-PAGE-RELOCATION."
+    );
 
-    logger(from , "Deleting old record from this page");
-    heap_file_delete(hf , tid);
+    buffer_pool_unpin_page(
+        hf->buffer_pool,
+        page_id,
+        false
+    );
 
+    logger(
+        from,
+        "Original page unpinned after failed in-place update."
+    );
 
-    logger(from , "Inserting new record in another page...");
-    TID newTid = heap_file_insert(hf , data, length);
+    logger(
+        from,
+        "Deleting old record from original page."
+    );
 
+    heap_file_delete(
+        hf,
+        tid
+    );
 
-    logger(from , "Page Successfully Updated");
+    logger(
+        from,
+        "Old record deleted successfully."
+    );
+
+    logger(
+        from,
+        "Inserting updated record into another page."
+    );
+
+    TID newTid =
+        heap_file_insert(
+            hf,
+            data,
+            length
+        );
+
+    logger(
+        from,
+        "Updated record inserted into new page."
+    );
+
+    logger(
+        from,
+        "Page successfully updated through relocation."
+    );
+
     return newTid;
 }
-
-
