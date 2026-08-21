@@ -9,15 +9,18 @@ mkdir -p databases
 rm -f databases/normal_database.db databases/page_database.db
 
 touch databases/normal_database.db databases/page_database.db
+
 mkdir -p "$REPO_ROOT/executables"
 
 gcc -std=c11 -Wall -Wextra -Iheaders \
-    layers/logger.c \
-    layers/disk_manager.c \
-    layers/slotted_page.c \
-    layers/heap_file.c \
-    layers/table_api.c \
-    layers/page.c \
+    src/logging/logger.c \
+    src/disk/disk_manager.c \
+    src/buffer/page_table.c \
+    src/buffer/buffer_pool.c \
+    src/storage/slotted_page.c \
+    src/storage/heap_file.c \
+    src/storage/table_api.c \
+    src/storage/page.c \
     benchmark/benchmark.c \
     -o "$REPO_ROOT/executables/benchmark_exec"
 

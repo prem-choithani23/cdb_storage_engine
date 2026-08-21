@@ -9,6 +9,7 @@
 #include "../common/config.h"
 
 
+void page_init(Page *page, PageId page_id);
 SlotId page_insert(Page * page , void * data ,  uint16_t length);
 int page_read(Page* page, SlotId slot_id, void* out, uint16_t length);
 SlotId page_update(Page* page, SlotId slot_id, void* data, uint16_t length);
