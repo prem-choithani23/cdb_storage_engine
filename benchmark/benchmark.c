@@ -8,7 +8,8 @@
 #include <time.h>
 
 #include "../include/storage/table_api.h"
-#include "../headers/data/student.h"
+#include "../include/data/student.h"
+#include "../include/common/tid.h"
 
 #define PAGE_DATABASE_PATH "./databases/page_database.db"
 #define NORMAL_DATABASE_PATH "./databases/normal_database.db"
