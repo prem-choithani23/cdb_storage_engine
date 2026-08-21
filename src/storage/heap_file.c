@@ -2,9 +2,9 @@
 // Created by prem-choithani on 7/1/26.
 //
 
-#include "../headers/heap_file.h"
-#include "../headers/logger.h"
-#include "../headers/config.h"
+#include "../../include/storage/heap_file.h"
+#include "../../include/logging/logger.h"
+#include "../../include/common/config.h"
 
 #include <stdlib.h>
 

@@ -7,7 +7,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "../headers/table_api.h"
+#include "../include/storage/table_api.h"
 #include "../headers/data/student.h"
 
 #define PAGE_DATABASE_PATH "./databases/page_database.db"

@@ -4,9 +4,9 @@
 
 #ifndef STORAGE_ENGINE_HEAP_FILE_H
 #define STORAGE_ENGINE_HEAP_FILE_H
-#include "disk_manager.h"
-#include "tid.h"
-#include "../headers/slotted_page.h"
+#include "../disk/disk_manager.h"
+#include "../common/tid.h"
+#include "slotted_page.h"
 
 typedef struct hf {
     DiskManager * dm;

@@ -16,8 +16,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "headers/table_api.h"
-#include "headers/data/student.h"
+#include "../include/storage/table_api.h"
+#include "../include/data/student.h"
 
 /* ------------------------------------------------------------------ */
 /* Globals                                                             */

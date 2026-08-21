@@ -4,11 +4,11 @@
 
 
 #include <stdint.h>
-#include "../headers/table_api.h"
+#include "../../include/storage/table_api.h"
 
 #include <stdlib.h>
 
-#include "../headers/logger.h"
+#include "../../include/logging/logger.h"
 
 static const char * from = "TABLE_API";
 

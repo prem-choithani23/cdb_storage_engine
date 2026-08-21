@@ -2,7 +2,7 @@
 // Created by prem-choithani on 7/1/26.
 //
 
-#include "../headers/page.h"
+#include "../../include/storage/page.h"
 #include "../headers/slot.h"
 
 size_t get_free_space(Page * page) {

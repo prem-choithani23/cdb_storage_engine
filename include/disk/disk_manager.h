@@ -4,7 +4,7 @@
 
 #ifndef STORAGE_ENGINE_DISK_MANAGER_H
 #define STORAGE_ENGINE_DISK_MANAGER_H
-#include "../headers/config.h"
+#include "../common/config.h"
 
 typedef struct {
     int fd;

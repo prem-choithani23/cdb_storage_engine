@@ -6,8 +6,8 @@
 
 #include <string.h>
 
-#include "../headers/slot.h"
-#include "../headers/logger.h"
+#include "../../include/storage/slot.h"
+#include "../../include/logging/logger.h"
 
 static const char * from  = "SLOTTED_PAGE";
 

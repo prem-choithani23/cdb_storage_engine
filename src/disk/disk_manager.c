@@ -7,8 +7,8 @@
 
 #include <stdint.h>
 
-#include "../headers/config.h"
-#include "../headers/disk_manager.h"
+#include "../../include/common/config.h"
+#include "../../include/disk/disk_manager.h"
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -16,8 +16,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "../headers/logger.h"
-#include "../headers/page.h"
+#include "../../include/logging/logger.h"
+#include "../../include/storage/page.h"
 
 
 static const char * from  = "DISK_MANAGER";

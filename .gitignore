@@ -1,0 +1,14 @@
+# Build files
+cmake-build-debug/
+
+# Generated executables
+executables/
+
+# Runtime databases
+databases/
+
+# Other build artifacts
+*.o
+*.a
+
+database.db

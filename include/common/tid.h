@@ -5,8 +5,8 @@
 #ifndef STORAGE_ENGINE_TID_H
 #define STORAGE_ENGINE_TID_H
 
-#include "page.h"
-#include "slotted_page.h"
+#include "../storage/page.h"
+#include "../storage/slotted_page.h"
 
 typedef struct tid {
     PageId page_id;

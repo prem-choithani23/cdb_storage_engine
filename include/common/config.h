@@ -3,7 +3,7 @@
 //
 
 #include <sys/types.h>
-#include "slot.h"
+#include "../storage/slot.h"
 #ifndef STORAGE_ENGINE_CONSTANTS_H
 #define STORAGE_ENGINE_CONSTANTS_H
 

@@ -2,8 +2,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "headers/table_api.h"
-#include "headers/data/student.h"
+#include "include/storage/table_api.h"
+#include "include/data/student.h"
 
 #define N 10
 

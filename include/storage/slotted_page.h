@@ -6,7 +6,7 @@
 #define STORAGE_ENGINE_SLOTTED_PAGE_H
 #include <stdint.h>
 #include "page.h"
-#include "config.h"
+#include "../common/config.h"
 
 
 SlotId page_insert(Page * page , void * data ,  uint16_t length);
