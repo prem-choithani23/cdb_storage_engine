@@ -7,9 +7,10 @@
 #include "../disk/disk_manager.h"
 #include "../common/tid.h"
 #include "slotted_page.h"
+#include "../buffer/buffer_pool.h"
 
 typedef struct hf {
-    DiskManager * dm;
+    BufferPool * buffer_pool;
     PageId first_free_page;
 }HeapFile;
 
