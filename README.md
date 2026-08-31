@@ -2,13 +2,13 @@
 
 A page-based storage engine written from scratch in C.
 
-Strata implements the core internals of a relational database storage layer — the part that sits below SQL, below query planning, below indexes — the part that actually puts bytes on disk and gets them back reliably. It is a minimal but real implementation modeled after concepts from PostgreSQL's heap storage and InnoDB's buffer pool manager.
+This project implements the core internals of a relational database storage layer — the part that sits below SQL, below query planning, below indexes — the part that actually puts bytes on disk and gets them back reliably. It is a minimal but real implementation modeled after concepts from PostgreSQL's heap storage and InnoDB's buffer pool manager.
 
 ---
 
 ## What It Is
 
-Most developers interact with databases through queries. Strata is the layer those queries never expose — the one that decides which page a record lives on, how to find it again in constant time, how to keep hot pages in memory, and how to avoid unnecessary disk I/O.
+Most developers interact with databases through queries. This project is the layer those queries never expose — the one that decides which page a record lives on, how to find it again in constant time, how to keep hot pages in memory, and how to avoid unnecessary disk I/O.
 
 It is not a toy. It implements real database internals:
 
@@ -25,7 +25,7 @@ It is also not production software. It is single-threaded, has no query language
 
 ## Architecture
 
-Strata is organized into five layers. Each layer only knows about the layer directly below it. No layer reaches past its neighbor.
+This project is organized into five layers. Each layer only knows about the layer directly below it. No layer reaches past its neighbor.
 
 ```
   main.c / Table API
@@ -84,7 +84,7 @@ The outermost layer. Wraps heap file operations with record-type-aware functions
 
 ## TID — Tuple Identifier
 
-Every record in Strata has a TID:
+Every record in This project has a TID:
 
 ```c
 typedef struct {
@@ -175,7 +175,7 @@ Increasing `BUFFER_POOL_SIZE` improves random read performance when the working 
 
 ## Benchmark
 
-Strata includes a benchmark comparing the paged engine against a flat-file implementation (fixed-size records, `fseek`-based access) across two workloads:
+This project includes a benchmark comparing the paged engine against a flat-file implementation (fixed-size records, `fseek`-based access) across two workloads:
 
 - Sequential insert of N students
 - Random read of N students (shuffled IDs)
@@ -208,17 +208,4 @@ The test suite covers:
 
 ---
 
-## Concepts Behind This Project
 
-If you want to understand why this exists, the relevant reading is:
-
-- CMU 15-445 Database Systems — Andy Pavlo's lectures on buffer pool management and heap files
-- *Database Internals* by Alex Petrov — chapters on storage engines and page layout
-- PostgreSQL source — `src/backend/storage/buffer/` for buffer pool, `src/backend/storage/page/` for slotted pages
-- InnoDB source — `buf/buf0buf.cc` for buffer pool, `fsp/fsp0fsp.cc` for space management
-
----
-
-## Author
-
-Built as a deep-dive systems project to understand what relational databases do below the query layer.
