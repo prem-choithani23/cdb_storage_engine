@@ -1,4 +1,4 @@
-# strata
+# Mini Storage Engine in C
 
 A page-based storage engine written from scratch in C.
 
