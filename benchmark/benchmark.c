@@ -14,7 +14,7 @@
 #define PAGE_DATABASE_PATH "./databases/page_database.db"
 #define NORMAL_DATABASE_PATH "./databases/normal_database.db"
 
-#define NUMBER_OF_STUDENTS 1000
+#define NUMBER_OF_STUDENTS 98753
 
 /* ===========================================================
                         NAME DATABASE
