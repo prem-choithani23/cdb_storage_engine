@@ -16,7 +16,7 @@
 static const char * from = "BUFFER_POOL";
 
 
-BufferPool * buffer_pool_open(const char * path) {
+BufferPool * buffer_pool_open(const char * path)  {
     logger(from, "Initializing buffer_pool_open...");
 
     // Allocate the entire BufferPool structure using 4096-byte boundary alignment
