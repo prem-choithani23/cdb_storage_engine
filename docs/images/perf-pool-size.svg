@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 420" width="780" height="420" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<title id="t">Why pool size matters</title>
+<desc id="d">With 420 frames the dataset does not fit and random reads take 11.35 s; with 1,500 frames they take 0.206 s. The insert loop takes 0.0717 s versus 0.0047 s.</desc>
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52514e"/></marker>
+<marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2a78d6"/></marker>
+<marker id="aro" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#eb6834"/></marker>
+</defs>
+<rect x="0.5" y="0.5" width="779" height="419" rx="12" fill="#fcfcfb" stroke="#dddcd6"/>
+<text x="40" y="34" font-size="16" fill="#0b0b0b" font-weight="700" text-anchor="start">Why pool size matters</text>
+<text x="40" y="54" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">100,000 records (~690 pages) · seconds, logarithmic axis (lower is better)</text>
+<line x1="100" y1="316.0" x2="740" y2="316.0" stroke="#e8e7e2" stroke-width="1"/>
+<text x="92" y="320.0" font-size="11" fill="#52514e" font-weight="400" text-anchor="end">0.001 s</text>
+<line x1="100" y1="274.4" x2="740" y2="274.4" stroke="#e8e7e2" stroke-width="1"/>
+<text x="92" y="278.4" font-size="11" fill="#52514e" font-weight="400" text-anchor="end">0.01 s</text>
+<line x1="100" y1="232.8" x2="740" y2="232.8" stroke="#e8e7e2" stroke-width="1"/>
+<text x="92" y="236.8" font-size="11" fill="#52514e" font-weight="400" text-anchor="end">0.1 s</text>
+<line x1="100" y1="191.2" x2="740" y2="191.2" stroke="#e8e7e2" stroke-width="1"/>
+<text x="92" y="195.2" font-size="11" fill="#52514e" font-weight="400" text-anchor="end">1 s</text>
+<line x1="100" y1="149.6" x2="740" y2="149.6" stroke="#e8e7e2" stroke-width="1"/>
+<text x="92" y="153.6" font-size="11" fill="#52514e" font-weight="400" text-anchor="end">10 s</text>
+<line x1="100" y1="108.0" x2="740" y2="108.0" stroke="#e8e7e2" stroke-width="1"/>
+<text x="92" y="112.0" font-size="11" fill="#52514e" font-weight="400" text-anchor="end">100 s</text>
+<path d="M186.0,316 V243.8 a5,5 0 0 1 5,-5 h60.0 a5,5 0 0 1 5,5 V316 Z" fill="#8fb9ec"/>
+<text x="221.0" y="231.8" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="middle">0.0717 s</text>
+<path d="M264.0,316 V293.0 a5,5 0 0 1 5,-5 h60.0 a5,5 0 0 1 5,5 V316 Z" fill="#2a78d6"/>
+<text x="299.0" y="281.0" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="middle">0.0047 s</text>
+<text x="260.0" y="338" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="middle">Insert loop</text>
+<text x="260.0" y="358" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="middle">≈15× faster with 1500</text>
+<path d="M506.0,316 V152.3 a5,5 0 0 1 5,-5 h60.0 a5,5 0 0 1 5,5 V316 Z" fill="#8fb9ec"/>
+<text x="541.0" y="140.3" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="middle">11.3 s</text>
+<path d="M584.0,316 V224.7 a5,5 0 0 1 5,-5 h60.0 a5,5 0 0 1 5,5 V316 Z" fill="#2a78d6"/>
+<text x="619.0" y="212.7" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="middle">0.2060 s</text>
+<text x="580.0" y="338" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="middle">Random read</text>
+<text x="580.0" y="358" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="middle">≈55× faster with 1500</text>
+<line x1="100" y1="316" x2="740" y2="316" stroke="#8a8985" stroke-width="1.5"/>
+<rect x="100" y="70" width="12" height="12" rx="3" fill="#8fb9ec"/>
+<text x="118" y="81" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">420 frames (default)</text>
+<rect x="282" y="70" width="12" height="12" rx="3" fill="#2a78d6"/>
+<text x="300" y="81" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">1,500 frames</text>
+</svg>

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 360" width="780" height="360" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<title id="t">Slotted page layout</title>
+<desc id="d">Header, then a slot array growing forward, free space in the middle, and records growing backward from the end of the page.</desc>
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52514e"/></marker>
+<marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2a78d6"/></marker>
+<marker id="aro" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#eb6834"/></marker>
+</defs>
+<rect x="0.5" y="0.5" width="779" height="359" rx="12" fill="#fcfcfb" stroke="#dddcd6"/>
+<text x="40" y="40" font-size="16" fill="#0b0b0b" font-weight="700" text-anchor="start">One 4096-byte page</text>
+<text x="40" y="58" font-size="11" fill="#52514e" font-weight="400" text-anchor="start">slot offsets are relative to data[], just after the header</text>
+<rect x="40" y="80" width="60" height="64" fill="#fdf3d9" stroke="#eda100" stroke-width="1.5"/>
+<text x="70.0" y="108" font-size="11" fill="#0b0b0b" font-weight="700" text-anchor="middle">Header</text>
+<text x="70.0" y="126" font-size="10" fill="#52514e" font-weight="400" text-anchor="middle">12 B</text>
+<rect x="100" y="80" width="40" height="64" fill="#fbe3a1" stroke="#eda100" stroke-width="1.5"/>
+<text x="120.0" y="108" font-size="11" fill="#0b0b0b" font-weight="700" text-anchor="middle">Slot 0</text>
+<text x="120.0" y="126" font-size="10" fill="#52514e" font-weight="400" text-anchor="middle">4 B</text>
+<rect x="140" y="80" width="40" height="64" fill="#fbe3a1" stroke="#eda100" stroke-width="1.5"/>
+<text x="160.0" y="108" font-size="11" fill="#0b0b0b" font-weight="700" text-anchor="middle">Slot 1</text>
+<text x="160.0" y="126" font-size="10" fill="#52514e" font-weight="400" text-anchor="middle">4 B</text>
+<rect x="180" y="80" width="40" height="64" fill="#fbe3a1" stroke="#eda100" stroke-width="1.5"/>
+<text x="200.0" y="108" font-size="11" fill="#0b0b0b" font-weight="700" text-anchor="middle">Slot 2</text>
+<text x="200.0" y="126" font-size="10" fill="#52514e" font-weight="400" text-anchor="middle">4 B</text>
+<rect x="220" y="80" width="360" height="64" fill="#fcfcfb" stroke="#8a8985" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="400" y="116" font-size="14" fill="#52514e" font-weight="700" text-anchor="middle">FREE SPACE</text>
+<rect x="580" y="80" width="60" height="64" fill="#f6cf6d" stroke="#eda100" stroke-width="1.5"/>
+<text x="610.0" y="117" font-size="11" fill="#0b0b0b" font-weight="700" text-anchor="middle">Record 2</text>
+<rect x="640" y="80" width="60" height="64" fill="#f6cf6d" stroke="#eda100" stroke-width="1.5"/>
+<text x="670.0" y="117" font-size="11" fill="#0b0b0b" font-weight="700" text-anchor="middle">Record 1</text>
+<rect x="700" y="80" width="40" height="64" fill="#f6cf6d" stroke="#eda100" stroke-width="1.5"/>
+<text x="720.0" y="117" font-size="11" fill="#0b0b0b" font-weight="700" text-anchor="middle">Rec 0</text>
+<line x1="228" y1="166" x2="358" y2="166" stroke="#52514e" stroke-width="1.6" marker-end="url(#ar)"/>
+<text x="228" y="184" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">slot array grows →</text>
+<line x1="572" y1="166" x2="442" y2="166" stroke="#52514e" stroke-width="1.6" marker-end="url(#ar)"/>
+<text x="572" y="184" font-size="12" fill="#52514e" font-weight="400" text-anchor="end">← records grow from the end</text>
+<line x1="580" y1="62" x2="580" y2="80" stroke="#0b0b0b" stroke-width="1.5"/>
+<text x="580" y="56" font-size="11" fill="#0b0b0b" font-weight="600" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">free_space_pointer</text>
+<text x="40" y="230" font-size="14" fill="#0b0b0b" font-weight="700" text-anchor="start">PageHeader (12 bytes, on disk)</text>
+<text x="40" y="256" font-size="12" fill="#0b0b0b" font-weight="600" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">page_id</text>
+<text x="210" y="256" font-size="12" fill="#52514e" font-weight="700" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">u32</text>
+<text x="255" y="256" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">which page am I</text>
+<text x="40" y="280" font-size="12" fill="#0b0b0b" font-weight="600" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">slot_count</text>
+<text x="210" y="280" font-size="12" fill="#52514e" font-weight="700" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">u16</text>
+<text x="255" y="280" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">slots (incl. tombstones)</text>
+<text x="40" y="304" font-size="12" fill="#0b0b0b" font-weight="600" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">free_space_pointer</text>
+<text x="210" y="304" font-size="12" fill="#52514e" font-weight="700" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">u16</text>
+<text x="255" y="304" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">start of the lowest record</text>
+<text x="40" y="328" font-size="12" fill="#0b0b0b" font-weight="600" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">next_free_page</text>
+<text x="210" y="328" font-size="12" fill="#52514e" font-weight="700" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">u32</text>
+<text x="255" y="328" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">next page in the free list</text>
+<text x="440" y="230" font-size="14" fill="#0b0b0b" font-weight="700" text-anchor="start">Slot (4 bytes)</text>
+<text x="440" y="256" font-size="12" fill="#0b0b0b" font-weight="600" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">offset</text>
+<text x="510" y="256" font-size="12" fill="#52514e" font-weight="700" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">u16</text>
+<text x="555" y="256" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">where the record starts</text>
+<text x="440" y="280" font-size="12" fill="#0b0b0b" font-weight="600" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">length</text>
+<text x="510" y="280" font-size="12" fill="#52514e" font-weight="700" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">u16</text>
+<text x="555" y="280" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">0 = tombstone (deleted)</text>
+<text x="440" y="320" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">Usable payload = 4096 − 12 = 4084 bytes</text>
+<text x="440" y="340" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">A record needs length + 4 bytes of slot.</text>
+</svg>

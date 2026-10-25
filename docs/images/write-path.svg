@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 392" width="780" height="392" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<title id="t">Insert write path before and after</title>
+<desc id="d">Before: every inserted record triggers a flush and a blocking direct write. After: the record is placed in the in-memory frame, the frame is marked dirty, and the disk write happens once, later.</desc>
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52514e"/></marker>
+<marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2a78d6"/></marker>
+<marker id="aro" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#eb6834"/></marker>
+</defs>
+<rect x="0.5" y="0.5" width="779" height="391" rx="12" fill="#fcfcfb" stroke="#dddcd6"/>
+<text x="40" y="36" font-size="16" fill="#0b0b0b" font-weight="700" text-anchor="start">Insert path: before vs after</text>
+<rect x="30" y="56" width="340" height="300" rx="10" fill="#fdece4" fill-opacity="0.35" stroke="#eb6834" stroke-width="1.5"/>
+<text x="48" y="82" font-size="14" fill="#0b0b0b" font-weight="700" text-anchor="start">BEFORE — flush on every record</text>
+<rect x="60" y="100" width="280" height="44" rx="8" fill="#fcfcfb" stroke="#eb6834" stroke-width="1.5"/>
+<text x="200.0" y="127.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">heap_file_insert</text>
+<rect x="60" y="170" width="280" height="44" rx="8" fill="#fcfcfb" stroke="#eb6834" stroke-width="1.5"/>
+<text x="200.0" y="197.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">page_insert → frame (RAM)</text>
+<rect x="60" y="240" width="280" height="44" rx="8" fill="#f9cdb9" stroke="#eb6834" stroke-width="1.5"/>
+<text x="200.0" y="267.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">buffer_pool_flush_page</text>
+<rect x="60" y="306" width="280" height="36" rx="8" fill="#f9cdb9" stroke="#eb6834" stroke-width="1.5"/>
+<text x="200.0" y="329.0" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="middle">pwrite(O_DIRECT) — CPU blocks</text>
+<line x1="200" y1="144" x2="200" y2="170" stroke="#eb6834" stroke-width="1.6" marker-end="url(#aro)"/>
+<line x1="200" y1="214" x2="200" y2="240" stroke="#eb6834" stroke-width="1.6" marker-end="url(#aro)"/>
+<line x1="200" y1="284" x2="200" y2="306" stroke="#eb6834" stroke-width="1.6" marker-end="url(#aro)"/>
+<path d="M345,324 C372,324 372,122 345,122" fill="none" stroke="#eb6834" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#aro)"/>
+<text x="352" y="230" font-size="12" fill="#eb6834" font-weight="700" text-anchor="start">×N</text>
+<rect x="410" y="56" width="340" height="300" rx="10" fill="#e6f0fb" fill-opacity="0.45" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="428" y="82" font-size="14" fill="#0b0b0b" font-weight="700" text-anchor="start">AFTER — absorb in RAM, write lazily</text>
+<rect x="440" y="100" width="280" height="44" rx="8" fill="#fcfcfb" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="580.0" y="127.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">heap_file_insert</text>
+<rect x="440" y="170" width="280" height="44" rx="8" fill="#fcfcfb" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="580.0" y="197.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">page_insert → frame (RAM)</text>
+<rect x="440" y="240" width="280" height="44" rx="8" fill="#cfe2f7" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="580.0" y="267.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">unpin_page(dirty = true)</text>
+<rect x="440" y="306" width="280" height="36" rx="8" fill="#fdece4" stroke="#eb6834" stroke-width="1.5"/>
+<text x="580.0" y="329.0" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="middle">…later: 1 pwrite per page</text>
+<line x1="580" y1="144" x2="580" y2="170" stroke="#2a78d6" stroke-width="1.6" marker-end="url(#arb)"/>
+<line x1="580" y1="214" x2="580" y2="240" stroke="#2a78d6" stroke-width="1.6" marker-end="url(#arb)"/>
+<line x1="580" y1="284" x2="580" y2="306" stroke="#2a78d6" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arb)"/>
+<text x="580" y="372" font-size="11" fill="#52514e" font-weight="400" text-anchor="middle">on clock eviction of a dirty frame, or buffer_pool_close()</text>
+<text x="200" y="372" font-size="11" fill="#52514e" font-weight="400" text-anchor="middle">same page rewritten once per record it holds</text>
+</svg>

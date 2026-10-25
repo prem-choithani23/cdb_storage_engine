@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" width="800" height="460" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<title id="t">Buffer pool fetch flow</title>
+<desc id="d">A lookup in the page table either hits and pins the frame, or misses, evicts a victim with the Clock algorithm (writing it back if dirty), reads the page from disk and pins it.</desc>
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52514e"/></marker>
+<marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2a78d6"/></marker>
+<marker id="aro" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#eb6834"/></marker>
+</defs>
+<rect x="0.5" y="0.5" width="799" height="459" rx="12" fill="#fcfcfb" stroke="#dddcd6"/>
+<text x="40" y="36" font-size="16" fill="#0b0b0b" font-weight="700" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">buffer_pool_fetch_page(page_id)</text>
+<rect x="40" y="60" width="230" height="50" rx="8" fill="#e6f0fb" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="155.0" y="75.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">page_table_lookup</text>
+<text x="155.0" y="93.0" font-size="11" fill="#52514e" font-weight="400" text-anchor="middle">O(1) hash lookup: PageId → frame</text>
+<polygon points="155,150 235,190 155,230 75,190" fill="#efeeea" stroke="#8a8985" stroke-width="1.5"/>
+<text x="155" y="195" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">in a frame?</text>
+<line x1="155" y1="110" x2="155" y2="150" stroke="#52514e" stroke-width="1.6" marker-end="url(#ar)"/>
+<text x="70" y="280" font-size="12" fill="#52514e" font-weight="700" text-anchor="start">YES — cache hit</text>
+<line x1="115" y1="210" x2="115" y2="262" stroke="#52514e" stroke-width="1.6" marker-end="url(#ar)"/>
+<rect x="40" y="290" width="230" height="70" rx="8" fill="#e6f0fb" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="155.0" y="315.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">ref_bit = 1 · pin_count++</text>
+<text x="155.0" y="333.0" font-size="12" fill="#52514e" font-weight="400" text-anchor="middle">no disk I/O</text>
+<rect x="40" y="395" width="230" height="44" rx="8" fill="#efeeea" stroke="#8a8985" stroke-width="1.5"/>
+<text x="155.0" y="422.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">return &amp;frame-&gt;page</text>
+<line x1="155" y1="360" x2="155" y2="395" stroke="#52514e" stroke-width="1.6" marker-end="url(#ar)"/>
+<line x1="235" y1="190" x2="330" y2="190" stroke="#52514e" stroke-width="1.6" marker-end="url(#ar)"/>
+<text x="282" y="182" font-size="12" fill="#52514e" font-weight="700" text-anchor="middle">NO — miss</text>
+<rect x="330" y="160" width="200" height="60" rx="8" fill="#e6f0fb" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="430.0" y="180.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">clock_evict()</text>
+<text x="430.0" y="198.0" font-size="12" fill="#52514e" font-weight="400" text-anchor="middle">pick a victim frame</text>
+<line x1="530" y1="190" x2="570" y2="190" stroke="#52514e" stroke-width="1.6" marker-end="url(#ar)"/>
+<polygon points="650,150 730,190 650,230 570,190" fill="#efeeea" stroke="#8a8985" stroke-width="1.5"/>
+<text x="650" y="195" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="middle">victim dirty?</text>
+<line x1="650" y1="230" x2="650" y2="262" stroke="#52514e" stroke-width="1.6" marker-end="url(#ar)"/>
+<text x="660" y="250" font-size="11" fill="#52514e" font-weight="400" text-anchor="start">yes</text>
+<rect x="540" y="262" width="220" height="56" rx="8" fill="#fdece4" stroke="#eb6834" stroke-width="1.5"/>
+<text x="650.0" y="280.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">disk_write_page</text>
+<text x="650.0" y="298.0" font-size="12" fill="#52514e" font-weight="400" text-anchor="middle">write victim back first</text>
+<text x="745" y="170" font-size="11" fill="#52514e" font-weight="400" text-anchor="start">no</text>
+<polyline points="730,190 770,190 770,364 740,364" fill="none" stroke="#52514e" stroke-width="1.6" marker-end="url(#ar)"/>
+<line x1="650" y1="318" x2="650" y2="335" stroke="#52514e" stroke-width="1.6" marker-end="url(#ar)"/>
+<rect x="540" y="335" width="200" height="58" rx="8" fill="#fdece4" stroke="#eb6834" stroke-width="1.5"/>
+<text x="640.0" y="354.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">disk_read_page</text>
+<text x="640.0" y="372.0" font-size="12" fill="#52514e" font-weight="400" text-anchor="middle">read the page into the frame</text>
+<line x1="540" y1="364" x2="500" y2="364" stroke="#52514e" stroke-width="1.6" marker-end="url(#ar)"/>
+<rect x="300" y="335" width="200" height="62" rx="8" fill="#e6f0fb" stroke="#2a78d6" stroke-width="1.5"/>
+<text x="400.0" y="348.0" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="middle">finish loading</text>
+<text x="400.0" y="366.0" font-size="12" fill="#52514e" font-weight="400" text-anchor="middle">page_table_insert</text>
+<text x="400.0" y="382.0" font-size="12" fill="#52514e" font-weight="400" text-anchor="middle">ref_bit = 1 · pin_count = 1</text>
+<line x1="300" y1="364" x2="270" y2="417" stroke="#52514e" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+<text x="540" y="425" font-size="11" fill="#52514e" font-weight="400" text-anchor="middle">the evicted page's mapping is removed from the page table</text>
+</svg>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 370" width="780" height="370" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<title id="t">Paged engine vs flat file</title>
+<desc id="d">Timed insert loop: 0.0047 s paged versus 0.123 s flat file. Insert including the flush on close: 0.173 s versus 0.123 s. Random read: 0.206 s paged versus 0.0457 s flat file.</desc>
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52514e"/></marker>
+<marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2a78d6"/></marker>
+<marker id="aro" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#eb6834"/></marker>
+</defs>
+<rect x="0.5" y="0.5" width="779" height="369" rx="12" fill="#fcfcfb" stroke="#dddcd6"/>
+<text x="40" y="34" font-size="16" fill="#0b0b0b" font-weight="700" text-anchor="start">Paged engine vs flat file (after the optimizations)</text>
+<text x="40" y="54" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">100,000 records · 1,500-frame pool · seconds, linear axis (lower is better)</text>
+<line x1="230.0" y1="92" x2="230.0" y2="316" stroke="#e8e7e2" stroke-width="1"/>
+<text x="230.0" y="334" font-size="11" fill="#52514e" font-weight="400" text-anchor="middle">0.00</text>
+<line x1="324.0" y1="92" x2="324.0" y2="316" stroke="#e8e7e2" stroke-width="1"/>
+<text x="324.0" y="334" font-size="11" fill="#52514e" font-weight="400" text-anchor="middle">0.05</text>
+<line x1="418.0" y1="92" x2="418.0" y2="316" stroke="#e8e7e2" stroke-width="1"/>
+<text x="418.0" y="334" font-size="11" fill="#52514e" font-weight="400" text-anchor="middle">0.10</text>
+<line x1="512.0" y1="92" x2="512.0" y2="316" stroke="#e8e7e2" stroke-width="1"/>
+<text x="512.0" y="334" font-size="11" fill="#52514e" font-weight="400" text-anchor="middle">0.15</text>
+<line x1="606.0" y1="92" x2="606.0" y2="316" stroke="#e8e7e2" stroke-width="1"/>
+<text x="606.0" y="334" font-size="11" fill="#52514e" font-weight="400" text-anchor="middle">0.20</text>
+<line x1="700.0" y1="92" x2="700.0" y2="316" stroke="#e8e7e2" stroke-width="1"/>
+<text x="700.0" y="334" font-size="11" fill="#52514e" font-weight="400" text-anchor="middle">0.25</text>
+<text x="230" y="354" font-size="11" fill="#52514e" font-weight="400" text-anchor="start">seconds</text>
+<text x="216" y="124" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="end">Insert (timed loop only)</text>
+<path d="M230,98 H234.8 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 H230 Z" fill="#2a78d6"/>
+<text x="246.8" y="116" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="start">0.0047 s</text>
+<path d="M230,124 H457.2 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 H230 Z" fill="#7a7975"/>
+<text x="469.2" y="142" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="start">0.1230 s</text>
+<text x="216" y="212" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="end">Insert incl. flush on close</text>
+<path d="M230,186 H551.2 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 H230 Z" fill="#2a78d6"/>
+<text x="563.2" y="204" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="start">0.1730 s</text>
+<path d="M230,212 H457.2 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 H230 Z" fill="#7a7975"/>
+<text x="469.2" y="230" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="start">0.1230 s</text>
+<text x="216" y="300" font-size="13" fill="#0b0b0b" font-weight="700" text-anchor="end">Random read</text>
+<path d="M230,274 H613.3 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 H230 Z" fill="#2a78d6"/>
+<text x="625.3" y="292" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="start">0.2060 s</text>
+<path d="M230,300 H311.9 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 H230 Z" fill="#7a7975"/>
+<text x="323.9" y="318" font-size="12" fill="#0b0b0b" font-weight="700" text-anchor="start">0.0457 s</text>
+<rect x="230" y="68" width="12" height="12" rx="3" fill="#2a78d6"/>
+<text x="248" y="79" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">paged engine (buffer pool, O_DIRECT)</text>
+<rect x="480" y="68" width="12" height="12" rx="3" fill="#7a7975"/>
+<text x="498" y="79" font-size="12" fill="#52514e" font-weight="400" text-anchor="start">flat file (OS page cache + fsync)</text>
+</svg>
