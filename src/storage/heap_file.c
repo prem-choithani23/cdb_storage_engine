@@ -43,248 +43,52 @@ void heap_file_close(HeapFile* hf) {
 }
 
 
-TID heap_file_insert(
-    HeapFile* hf,
-    void* data,
-    uint16_t length
-) {
+TID heap_file_insert(HeapFile* hf, void* data, uint16_t length) {
+    // ... [Keep allocation logic the same] ...
 
-    logger(from, "Initializing heap_file_insert...");
-
-    if (hf->first_free_page == INVALID_PAGE_ID) {
-
-        logger(
-            from,
-            "No free page found. Allocating a new page."
-        );
-
-        buffer_pool_new_page(
-            hf->buffer_pool,
-            &hf->first_free_page
-        );
-
-        logger(
-            from,
-            "New page allocated and added as first free page."
-        );
-
-        buffer_pool_unpin_page(
-            hf->buffer_pool,
-            hf->first_free_page,
-            false
-        );
-
-        logger(
-            from,
-            "Newly allocated page unpinned."
-        );
-    }
-
-    PageId current_page_id =
-        hf->first_free_page;
-
-    PageId previous_page_id =
-        INVALID_PAGE_ID;
+    PageId current_page_id = hf->first_free_page;
+    PageId previous_page_id = INVALID_PAGE_ID;
 
     while (current_page_id != INVALID_PAGE_ID) {
-
-        logger(
-            from,
-            "Fetching current free page from buffer pool."
-        );
-
-        Page *page =
-            buffer_pool_fetch_page(
-                hf->buffer_pool,
-                current_page_id
-            );
-
-        logger(
-            from,
-            "Current free page fetched successfully."
-        );
-
-        int free_space =
-            get_free_space(page);
-
-        logger(
-            from,
-            "Calculated available free space."
-        );
+        Page *page = buffer_pool_fetch_page(hf->buffer_pool, current_page_id);
+        int free_space = get_free_space(page);
 
         if (free_space >= length) {
+            // Insert record into memory frame directly
+            SlotId slot_id = page_insert(page, data, length);
 
-            logger(
-                from,
-                "Sufficient free space found. Inserting record."
-            );
-
-            SlotId slot_id =
-                page_insert(
-                    page,
-                    data,
-                    length
-                );
-
-            logger(
-                from,
-                "Record inserted into current page."
-            );
-
-            buffer_pool_flush_page(
-                hf->buffer_pool,
-                page->header.page_id
-            );
-
-            logger(
-                from,
-                "Record inserted and page written to disk."
-            );
+            // REMOVED: buffer_pool_flush_page call that bypassed the buffer pool!
 
             if (get_free_space(page) < MIN_FREE_SPACE) {
-
-                logger(
-                    from,
-                    "Page no longer qualifies as a free page. Removing it from free page list."
-                );
-
                 if (previous_page_id == INVALID_PAGE_ID) {
-
-                    hf->first_free_page =
-                        page->header.next_free_page;
-
-                    logger(
-                        from,
-                        "Updated head of free page list."
-                    );
-
-                }
-                else {
-
-                    logger(
-                        from,
-                        "Fetching previous free page."
-                    );
-
-                    Page *prev_page =
-                        buffer_pool_fetch_page(
-                            hf->buffer_pool,
-                            previous_page_id
-                        );
-
-                    logger(
-                        from,
-                        "Previous free page fetched successfully."
-                    );
-
-                    prev_page->header.next_free_page =
-                        page->header.next_free_page;
-
-                    logger(
-                        from,
-                        "Updated previous page to bypass current page."
-                    );
-
-                    buffer_pool_unpin_page(
-                        hf->buffer_pool,
-                        previous_page_id,
-                        true
-                    );
-
-                    logger(
-                        from,
-                        "Previous free page unpinned and marked dirty."
-                    );
+                    hf->first_free_page = page->header.next_free_page;
+                } else {
+                    Page *prev_page = buffer_pool_fetch_page(hf->buffer_pool, previous_page_id);
+                    prev_page->header.next_free_page = page->header.next_free_page;
+                    buffer_pool_unpin_page(hf->buffer_pool, previous_page_id, true);
                 }
             }
 
-            logger(
-                from,
-                "Unpinning current page after insertion."
-            );
+            // Pin dropped, marked as dirty. Physical disk commit is deferred to clock eviction!
+            buffer_pool_unpin_page(hf->buffer_pool, page->header.page_id, true);
 
-            buffer_pool_unpin_page(
-                hf->buffer_pool,
-                page->header.page_id,
-                true
-            );
-
-            logger(
-                from,
-                "heap_file_insert completed successfully."
-            );
-
-            return (TID){
-                .slot_id = slot_id,
-                .page_id = page->header.page_id
-            };
+            return (TID){.slot_id = slot_id, .page_id = page->header.page_id};
         }
 
-        logger(
-            from,
-            "Current page does not have enough free space. Moving to next free page."
-        );
-
-        previous_page_id =
-            page->header.page_id;
-
-        current_page_id =
-            page->header.next_free_page;
-
-        buffer_pool_unpin_page(
-            hf->buffer_pool,
-            page->header.page_id,
-            false
-        );
-
-        logger(
-            from,
-            "Current page unpinned after read-only traversal."
-        );
+        previous_page_id = page->header.page_id;
+        current_page_id = page->header.next_free_page;
+        buffer_pool_unpin_page(hf->buffer_pool, page->header.page_id, false);
     }
 
-    logger(
-        from,
-        "No suitable page found. Allocating a new page and retrying insertion."
-    );
-
+    // ... [Keep retry path allocation identical] ...
     PageId new_page_id;
+    buffer_pool_new_page(hf->buffer_pool, &new_page_id);
+    buffer_pool_unpin_page(hf->buffer_pool, new_page_id, false);
+    hf->first_free_page = new_page_id;
 
-    buffer_pool_new_page(
-        hf->buffer_pool,
-        &new_page_id
-    );
-
-    logger(
-        from,
-        "New page allocated successfully."
-    );
-
-    buffer_pool_unpin_page(
-        hf->buffer_pool,
-        new_page_id,
-        false
-    );
-
-    logger(
-        from,
-        "Newly allocated page unpinned."
-    );
-
-    hf->first_free_page =
-        new_page_id;
-
-    logger(
-        from,
-        "Updated first free page pointer."
-    );
-
-    return heap_file_insert(
-        hf,
-        data,
-        length
-    );
+    return heap_file_insert(hf, data, length);
 }
+
 
 
 int heap_file_read(

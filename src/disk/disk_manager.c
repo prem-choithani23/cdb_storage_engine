@@ -2,8 +2,8 @@
 // Created by prem-choithani on 6/7/26.
 //
 
-#define _XOPEN_SOURCE 700
-
+// #define _XOPEN_SOURCE 700
+#define _GNU_SOURCE
 
 #include <stdint.h>
 
@@ -13,7 +13,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+
 #include <unistd.h>
 #include <sys/stat.h>
 #include "../../include/logging/logger.h"
@@ -27,7 +27,7 @@ DiskManager * disk_manager_open(const char * path) {
 
     logger(from , "Opening Disk manager");
     DiskManager * disk_manager = (DiskManager *)malloc(sizeof(DiskManager));
-    disk_manager->fd = open(path, O_RDWR | O_CREAT , O_CREAT);
+    disk_manager->fd = open(path, O_RDWR | O_CREAT | O_DIRECT, 0644);
 
     if (disk_manager->fd == -1) {
         logger(from , "Failed to open database file");
@@ -81,19 +81,27 @@ PageId disk_allocate_page(const DiskManager * disk_manager) {
 
     if (fstat(disk_manager->fd, &file_info) == -1) {
         logger(from , "Error getting file status");
+        perror("fstat failed");
     }
 
     const off_t file_size = file_info.st_size;
+    const PageId newPageId = file_size / PAGE_SIZE;
 
-    const PageId newPageId = file_size/PAGE_SIZE;
+    logger(from, "Extending database file space implicitly using ftruncate.");
 
-    Page page;
-    page_init(&page , newPageId);
+    // Extend the file size tracking implicitly to the new page boundary
+    // This creates a sparse block without hitting synchronous disk write penalties
+    if (ftruncate(disk_manager->fd, (off_t)(newPageId + 1) * PAGE_SIZE) == -1) {
+        logger(from, "Failed structural file extension allocation");
+        perror("ftruncate failed");
+    }
 
-    pwrite(disk_manager->fd, &page, PAGE_SIZE, (off_t)newPageId * PAGE_SIZE);
+    logger(from, "New page allocated successfully via virtual sizing.");
 
     return newPageId;
 }
+
+
 
 void disk_deallocate_page(DiskManager * disk_manager , PageId pid) {
     // not yet

@@ -251,6 +251,7 @@ Page * buffer_pool_fetch_page(
         &bf->buffer_frames[frame_id];
 
     buffer_frame->ref_bit = 1;
+    buffer_frame->pin_count++;
 
     logger(
         from,
