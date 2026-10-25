@@ -2,8 +2,8 @@
 // Created by prem-choithani on 6/7/26.
 //
 
-#define _XOPEN_SOURCE 700
-
+// #define _XOPEN_SOURCE 700
+#define _GNU_SOURCE
 
 #include <stdint.h>
 
@@ -13,7 +13,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+
 #include <unistd.h>
 #include <sys/stat.h>
 #include "../../include/logging/logger.h"
@@ -27,7 +27,7 @@ DiskManager * disk_manager_open(const char * path) {
 
     logger(from , "Opening Disk manager");
     DiskManager * disk_manager = (DiskManager *)malloc(sizeof(DiskManager));
-    disk_manager->fd = open(path, O_RDWR | O_CREAT , O_CREAT);
+    disk_manager->fd = open(path, O_RDWR | O_CREAT | O_DIRECT, 0644);
 
     if (disk_manager->fd == -1) {
         logger(from , "Failed to open database file");
