@@ -2,10 +2,13 @@
 // benchmark.c
 //
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "../include/storage/table_api.h"
 #include "../include/data/student.h"
@@ -14,7 +17,7 @@
 #define PAGE_DATABASE_PATH "./databases/page_database.db"
 #define NORMAL_DATABASE_PATH "./databases/normal_database.db"
 
-#define NUMBER_OF_STUDENTS 1000
+#define NUMBER_OF_STUDENTS 900000
 
 /* ===========================================================
                         NAME DATABASE
@@ -117,22 +120,23 @@ void destroy_bulk_students(Student **students)
 }
 
 /* ===========================================================
-                    TIMER
+                    TIMER (Fixed to Wall-Clock Time)
    =========================================================== */
 
 double now()
 {
-    return (double)clock() / CLOCKS_PER_SEC;
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec + (double)ts.tv_nsec / 1e9;
 }
 
 /* ===========================================================
-                NON PAGING INSERT
+        NON PAGING INSERT (Fixed with Deep Serialization & Fsync)
    =========================================================== */
 
 double benchmark_insert_non_paging(Student **students)
 {
-    FILE *fp =
-            fopen(NORMAL_DATABASE_PATH, "wb");
+    FILE *fp = fopen(NORMAL_DATABASE_PATH, "wb");
 
     if (!fp)
     {
@@ -144,15 +148,17 @@ double benchmark_insert_non_paging(Student **students)
 
     for (int i = 0; i < NUMBER_OF_STUDENTS; i++)
     {
-        fwrite(
-                students[i],
-                sizeof(Student),
-                1,
-                fp
-        );
+        // 1. Write the static data (id, age, etc.)
+        fwrite(students[i], sizeof(Student), 1, fp);
+
+        // 2. Write the dynamic name string to ensure actual disk payload matches paging system
+        uint32_t name_len = strlen(students[i]->name) + 1;
+        fwrite(&name_len, sizeof(uint32_t), 1, fp);
+        fwrite(students[i]->name, sizeof(char), name_len, fp);
     }
 
     fflush(fp);
+    fsync(fileno(fp)); // Force OS kernel buffer to commit to physical disk storage
 
     double end = now();
 
@@ -162,13 +168,12 @@ double benchmark_insert_non_paging(Student **students)
 }
 
 /* ===========================================================
-                NON PAGING RANDOM READ
+            NON PAGING RANDOM READ (Fixed with Deep Deserialization)
    =========================================================== */
 
-double benchmark_read_non_paging(int ids[])
+double benchmark_read_non_paging(int ids[], Student **students_source)
 {
-    FILE *fp =
-            fopen(NORMAL_DATABASE_PATH, "rb");
+    FILE *fp = fopen(NORMAL_DATABASE_PATH, "rb");
 
     if (!fp)
     {
@@ -176,7 +181,17 @@ double benchmark_read_non_paging(int ids[])
         exit(EXIT_FAILURE);
     }
 
+    // Precalculate file positions to ensure random lookup capability without reading sequentially
+    long *positions = malloc(sizeof(long) * NUMBER_OF_STUDENTS);
+    long current_pos = 0;
+    for (int i = 0; i < NUMBER_OF_STUDENTS; i++)
+    {
+        positions[i] = current_pos;
+        current_pos += sizeof(Student) + sizeof(uint32_t) + strlen(students_source[i]->name) + 1;
+    }
+
     Student s;
+    char name_buf[256];
 
     double start = now();
 
@@ -184,22 +199,18 @@ double benchmark_read_non_paging(int ids[])
     {
         int row = ids[i] - 1;
 
-        fseek(
-                fp,
-                row * sizeof(Student),
-                SEEK_SET
-        );
+        fseek(fp, positions[row], SEEK_SET);
 
-        fread(
-                &s,
-                sizeof(Student),
-                1,
-                fp
-        );
+        fread(&s, sizeof(Student), 1, fp);
+
+        uint32_t name_len;
+        fread(&name_len, sizeof(uint32_t), 1, fp);
+        fread(name_buf, sizeof(char), name_len, fp);
     }
 
     double end = now();
 
+    free(positions);
     fclose(fp);
 
     return end - start;
@@ -284,23 +295,13 @@ void print_results(
 
     printf("\n---------------- INSERTION ----------------\n");
 
-    printf("%-20s %.6f sec\n",
-           "Paging",
-           page_insert);
-
-    printf("%-20s %.6f sec\n",
-           "Non Paging",
-           normal_insert);
+    printf("%-20s %.6f sec\n", "Paging", page_insert);
+    printf("%-20s %.6f sec\n", "Non Paging", normal_insert);
 
     printf("\n---------------- RANDOM READS ----------------\n");
 
-    printf("%-20s %.6f sec\n",
-           "Paging",
-           page_read);
-
-    printf("%-20s %.6f sec\n",
-           "Non Paging",
-           normal_read);
+    printf("%-20s %.6f sec\n", "Paging", page_read);
+    printf("%-20s %.6f sec\n", "Non Paging", normal_read);
 
     printf("\n");
 
@@ -325,15 +326,19 @@ int main()
 {
     srand(time(NULL));
 
-    printf("\nPreparing %d students...\n\n",
-           NUMBER_OF_STUDENTS);
+    printf("\nPreparing %d students...\n\n", NUMBER_OF_STUDENTS);
 
-    Student **students =
-            prepare_bulk_students();
+    Student **students = prepare_bulk_students();
 
-    TID tids[NUMBER_OF_STUDENTS];
+    // Heap allocation fixes the Stack Overflow crash completely
+    TID *tids = malloc(sizeof(TID) * NUMBER_OF_STUDENTS);
+    int *ids = malloc(sizeof(int) * NUMBER_OF_STUDENTS);
 
-    int ids[NUMBER_OF_STUDENTS];
+    if (!tids || !ids)
+    {
+        fprintf(stderr, "Fatal: Out of memory for tracking tracking structures.\n");
+        exit(EXIT_FAILURE);
+    }
 
     for (int i = 0; i < NUMBER_OF_STUDENTS; i++)
         ids[i] = i + 1;
@@ -341,38 +346,23 @@ int main()
     shuffle(ids, NUMBER_OF_STUDENTS);
 
     printf("Running insertion benchmark (Paging)...\n");
-
-    double page_insert =
-            benchmark_insert_paging(
-                    students,
-                    tids);
+    double page_insert = benchmark_insert_paging(students, tids);
 
     printf("Running insertion benchmark (Non Paging)...\n");
-
-    double normal_insert =
-            benchmark_insert_non_paging(
-                    students);
+    double normal_insert = benchmark_insert_non_paging(students);
 
     printf("Running random read benchmark (Paging)...\n");
-
-    double page_read =
-            benchmark_read_paging(
-                    tids,
-                    ids);
+    double page_read = benchmark_read_paging(tids, ids);
 
     printf("Running random read benchmark (Non Paging)...\n");
+    double normal_read = benchmark_read_non_paging(ids, students);
 
-    double normal_read =
-            benchmark_read_non_paging(
-                    ids);
+    print_results(page_insert, normal_insert, page_read, normal_read);
 
-    print_results(
-            page_insert,
-            normal_insert,
-            page_read,
-            normal_read);
-
+    // Dynamic Memory Cleanup
     destroy_bulk_students(students);
+    free(tids);
+    free(ids);
 
     return 0;
 }

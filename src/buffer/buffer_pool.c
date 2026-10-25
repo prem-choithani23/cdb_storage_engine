@@ -4,8 +4,11 @@
 
 #include "../../include/buffer/buffer_pool.h"
 
+#define _GNU_SOURCE
+
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "../../include/storage/slotted_page.h"
 #include "../../include/logging/logger.h"
@@ -13,22 +16,27 @@
 static const char * from = "BUFFER_POOL";
 
 
-BufferPool * buffer_pool_open(const char * path) {
-
+BufferPool * buffer_pool_open(const char * path)  {
     logger(from, "Initializing buffer_pool_open...");
 
-    BufferPool * buffer_pool =
-        (BufferPool*)malloc(sizeof(BufferPool));
+    // Allocate the entire BufferPool structure using 4096-byte boundary alignment
+    BufferPool * buffer_pool = NULL;
+    int ret = posix_memalign((void**)&buffer_pool, 4096, sizeof(BufferPool));
+    if (ret != 0) {
+        logger(from, "Failed to allocate aligned memory for BufferPool");
+        perror("posix_memalign failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Zero out the entire allocated memory block safely
+    memset(buffer_pool, 0, sizeof(BufferPool));
 
     buffer_pool->clock_hand = 0;
 
     logger(from, "Creating page table.");
-
-    buffer_pool->page_table =
-        page_table_create(PAGE_TABLE_CAPACITY);
+    buffer_pool->page_table = page_table_create(PAGE_TABLE_CAPACITY);
 
     logger(from, "Initializing buffer frames.");
-
     memset(
         buffer_pool->buffer_frames,
         0,
@@ -36,15 +44,12 @@ BufferPool * buffer_pool_open(const char * path) {
     );
 
     logger(from, "Opening disk manager.");
-
-    buffer_pool->dm =
-        disk_manager_open(path);
+    buffer_pool->dm = disk_manager_open(path);
 
     logger(from, "Buffer pool opened successfully.");
 
     return buffer_pool;
 }
-
 
 void buffer_pool_close(BufferPool* bp) {
 
@@ -251,6 +256,7 @@ Page * buffer_pool_fetch_page(
         &bf->buffer_frames[frame_id];
 
     buffer_frame->ref_bit = 1;
+    buffer_frame->pin_count++;
 
     logger(
         from,
